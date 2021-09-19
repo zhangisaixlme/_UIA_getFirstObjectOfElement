@@ -1,0 +1,53 @@
+#include <EditConstants.au3>
+#include <GUIConstantsEx.au3>
+#include <WindowsConstants.au3>
+#include <constants.au3>
+#include <WinAPI.au3>
+#include "CUIAutomation2.au3"
+#include "UIAWrappers.au3"
+
+#AutoIt3Wrapper_UseX64=Y  ;Should be used for stuff like tagpoint having right struct etc. when running on a 64 bits os
+
+Consolewrite("**** Get the taskbar ****" & @CRLF)
+$oTaskBar=_UIA_gettaskbar()
+;~ Equal To
+;~ _UIA_getFirstObjectOfElement($oDesktop,"classname:=Shell_TrayWnd",$TreeScope_Children)
+
+Consolewrite("**** All childs of the taskbar ****" & @CRLF)
+;~  _UIA_dumpThemAll($otaskbar,$treescope_subtree)
+
+Dim $pInvoke ;~ Pattern invoke
+Dim $oStart  ;~ Object reference to IUIElement for button start
+
+Consolewrite("**** Different ways of assigning the startbutton to an object ****" & @CRLF)
+;~ $oStart=_UIA_getFirstObjectOfElement($oTaskbar,"Starten", $treescope_subtree)
+$oStart=_UIA_getFirstObjectOfElement($oTaskbar,"name:=Starten", $treescope_subtree)
+
+Dim $oClock  ;~ Object reference to IUIElement for button of clock, be aware this is a panel not a button
+$oClock=_UIA_getFirstObjectOfElement($oTaskbar,"classname:=TrayClockWClass", $treescope_subtree)
+
+Consolewrite("**** try to click on the start button of the taskbar ****" & @CRLF)
+;~ Get the first item that has as the name: Starten change to Start for english or other text to match start button in local language
+$oStart=_UIA_getFirstObjectOfElement($oTaskbar,"Starten", $treescope_subtree)
+
+if isobj($oStart) Then
+    consolewrite("Start button found")
+Else
+    consolewrite("I bet the text has to change to Start instead of Starten")
+EndIf
+
+Consolewrite("Get the invoke pattern to click on the start button item. Invoke possible: " & _UIA_getPropertyValue($oUIElement, $UIA_IsInvokePatternAvailablePropertyId) & @CRLF)
+;~ $oStart.getCurrentPattern($UIA_InvokePatternId, $pInvoke)
+;~ $oInvokeP=objCreateInterface($pInvoke, $sIID_IUIAutomationInvokePattern, $dtagIUIAutomationInvokePattern)
+$oInvokeP=_UIA_getpattern($oStart,$UIA_InvokePatternID)
+$oInvokeP.invoke()
+sleep(100)
+
+Consolewrite("Get the menu that is after the start button" & @crlf)
+
+$oMenuStart=_UIA_getFirstObjectOfElement($oDesktop,"Menu Start", $treescope_children)
+if isobj($oMenuStart) Then
+    consolewrite("Menu start found" & @crlf)
+Else
+    consolewrite("I bet the text has to change to Start instead of Starten" & @crlf)
+EndIf
